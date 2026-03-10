@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EC10b Midterm Review — Lectures 4, 7 & 8</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --gold: #c8a84b;
+    --gold-light: #e8d08b;
+    --red: #b83232;
+    --green: #2a6e3f;
+    --blue: #1a3a5c;
+    --blue-light: #2a5a8c;
+    --muted: #7a7060;
+    --card: #faf6ee;
+    --border: #d4c9a8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,160,100,0.08) 28px),
+      radial-gradient(ellipse at 20% 10%, rgba(200,168,75,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(26,58,92,0.05) 0%, transparent 60%);
+  }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ══════════════════════════════════════
+     HOME
+  ══════════════════════════════════════ */
+  #home {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #home::before {
+    content: '📊';
+    position: absolute;
+    font-size: 20rem;
+    opacity: 0.03;
+    top: -4rem;
+    left: -4rem;
+    transform: rotate(-15deg);
+    pointer-events: none;
+  }
+
+  .home-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1.5px solid var(--gold);
+    padding: 0.35rem 1rem;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    animation: fadeSlideDown 0.6s ease both;
+  }
+
+  .home-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    animation: fadeSlideDown 0.6s 0.1s ease both;
+  }
+
+  .home-title span { color: var(--gold); font-style: italic; }
+
+  .home-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    animation: fadeSlideDown 0.6s 0.2s ease both;
+  }
+
+  .home-topics {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 3rem;
+    animation: fadeSlideDown 0.6s 0.25s ease both;
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    max-width: 860px;
+    width: 100%;
+    animation: fadeSlideDown 0.6s 0.35s ease both;
+  }
+
+  .mode-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 1.8rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mode-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .mode-card:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 8px 24px rgba(200,168,75,0.15); }
+  .mode-card:hover::after { opacity: 0.04; }
+
+  .mode-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+  .mode-name { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--ink); }
+  .mode-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+  .mode-count { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--gold); font-weight: 600; letter-spacing: 0.1em; margin-top: 0.8rem; }
+
+  /* ══════════════════════════════════════
+     SHARED HEADER
+  ══════════════════════════════════════ */
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .game-header-left { display: flex; align-items: center; gap: 1rem; }
+
+  .back-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    cursor: pointer;
+    border: 1px solid var(--gold);
+    padding: 0.3rem 0.7rem;
+    transition: all 0.15s;
+    background: none;
+  }
+  .back-btn:hover { background: var(--gold); color: var(--ink); }
+
+  .game-title-bar { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+
+  .score-bar { display: flex; align-items: center; gap: 1.5rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; }
+  .score-item { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+  .score-label { color: #888; font-size: 0.6rem; letter-spacing: 0.1em; }
+  .score-val { color: var(--gold); font-size: 1rem; font-weight: 600; }
+
+  .progress-wrap { height: 3px; background: rgba(255,255,255,0.1); position: relative; }
+  .progress-fill { height: 100%; background: var(--gold); transition: width 0.4s ease; }
+
+  /* ══════════════════════════════════════
+     QUIZ
+  ══════════════════════════════════════ */
+  .quiz-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    max-width: 780px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .q-topic { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 1rem; }
+  .q-number { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .q-text { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 700; line-height: 1.4; text-align: center; margin-bottom: 2.5rem; color: var(--ink); max-width: 640px; }
+  .q-formula { font-family: 'IBM Plex Mono', monospace; background: var(--ink); color: var(--gold-light); padding: 0.8rem 1.5rem; font-size: 0.95rem; border-radius: 2px; margin: -1rem 0 2rem; display: inline-block; }
+
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; width: 100%; max-width: 640px; }
+  @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .option-btn {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--ink);
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .option-btn:hover:not(:disabled) { border-color: var(--gold); background: #fdf8ec; transform: translateX(3px); }
+  .opt-letter { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 600; color: var(--gold); min-width: 1.2rem; padding-top: 0.1rem; }
+  .option-btn.correct { background: #e8f5ee; border-color: var(--green); color: var(--green); }
+  .option-btn.correct .opt-letter { color: var(--green); }
+  .option-btn.wrong { background: #fceaea; border-color: var(--red); color: var(--red); }
+  .option-btn.wrong .opt-letter { color: var(--red); }
+  .option-btn.reveal-correct { background: #e8f5ee; border-color: var(--green); color: var(--green); }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback-box {
+    max-width: 640px;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.5rem;
+    border-left: 3px solid var(--green);
+    background: #f0f8f4;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #1a3a2a;
+    animation: fadeSlideDown 0.3s ease both;
+    display: none;
+  }
+  .feedback-box.wrong-fb { border-color: var(--red); background: #fdf0f0; color: #4a1a1a; }
+  .feedback-box strong { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; letter-spacing: 0.05em; display: block; margin-bottom: 0.4rem; }
+
+  .next-btn {
+    margin-top: 1.5rem;
+    background: var(--ink);
+    color: var(--gold);
+    border: none;
+    padding: 0.8rem 2.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: none;
+    text-transform: uppercase;
+  }
+  .next-btn:hover { background: var(--blue); }
+
+  /* ══════════════════════════════════════
+     FLASHCARDS
+  ══════════════════════════════════════ */
+  .flash-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.5rem; }
+  .flash-hint { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; }
+
+  .card-scene { width: 100%; max-width: 600px; height: 320px; perspective: 1200px; cursor: pointer; margin-bottom: 2rem; }
+  .card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; border: 1.5px solid var(--border); background: var(--card); text-align: center; }
+  .card-back { transform: rotateY(180deg); background: var(--ink); border-color: var(--gold); color: var(--paper); }
+
+  .card-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+  .card-back .card-tag { color: var(--gold-light); }
+  .card-term { font-family: 'Playfair Display', serif; font-size: clamp(1.3rem, 4vw, 1.9rem); font-weight: 700; line-height: 1.3; }
+  .card-def { font-size: 0.92rem; line-height: 1.65; color: #d4c9a8; }
+  .card-def .highlight { color: var(--gold-light); font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; }
+
+  .flash-controls { display: flex; gap: 1rem; align-items: center; }
+  .flash-btn { background: var(--card); border: 1.5px solid var(--border); padding: 0.7rem 1.5rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; cursor: pointer; color: var(--ink); transition: all 0.15s; }
+  .flash-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .flash-counter { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; color: var(--muted); min-width: 4rem; text-align: center; }
+
+  /* ══════════════════════════════════════
+     FORMULA LAB
+  ══════════════════════════════════════ */
+  .formula-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; max-width: 700px; margin: 0 auto; width: 100%; }
+  .formula-display { font-family: 'IBM Plex Mono', monospace; font-size: clamp(1.2rem, 4vw, 2rem); font-weight: 600; background: var(--ink); color: var(--gold-light); padding: 1.5rem 2rem; width: 100%; max-width: 580px; text-align: center; margin-bottom: 2rem; letter-spacing: 0.05em; border: 1px solid #333; box-shadow: inset 0 0 30px rgba(200,168,75,0.05); }
+  .formula-q { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 2rem; color: var(--ink); }
+  .fill-options { display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; max-width: 580px; margin-bottom: 1.5rem; }
+  .fill-chip { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; padding: 0.5rem 1rem; border: 1.5px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.15s; color: var(--ink); }
+  .fill-chip:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); background: #fdf8ec; }
+  .fill-chip.correct-chip { background: var(--green); color: white; border-color: var(--green); }
+  .fill-chip.wrong-chip { background: var(--red); color: white; border-color: var(--red); }
+
+  /* ══════════════════════════════════════
+     RESULTS
+  ══════════════════════════════════════ */
+  #results { align-items: center; justify-content: center; padding: 2.5rem 1.5rem; text-align: center; }
+  .result-grade { font-family: 'Playfair Display', serif; font-size: 6rem; font-weight: 900; line-height: 1; color: var(--gold); animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .result-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-bottom: 1rem; }
+  .result-msg { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--ink); }
+  .result-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 2.5rem; }
+
+  .result-breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 400px; margin: 0 auto 2.5rem; }
+  .rb-item { background: var(--card); border: 1.5px solid var(--border); padding: 1rem; }
+  .rb-val { font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; font-weight: 600; color: var(--ink); }
+  .rb-label { font-size: 0.7rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.05em; }
+
+  .result-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .result-btn { padding: 0.8rem 1.8rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; cursor: pointer; text-transform: uppercase; transition: all 0.15s; border: none; }
+  .result-btn.primary { background: var(--ink); color: var(--gold); }
+  .result-btn.primary:hover { background: var(--blue); }
+  .result-btn.secondary { background: var(--card); color: var(--ink); border: 1.5px solid var(--border); }
+  .result-btn.secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ══════════════════════════════════════
+     REFERENCE
+  ══════════════════════════════════════ */
+  .ref-body { flex: 1; max-width: 900px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; }
+  .ref-section { margin-bottom: 2.5rem; }
+  .ref-section-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); border-bottom: 2px solid var(--gold); padding-bottom: 0.5rem; margin-bottom: 1.2rem; }
+
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .ref-table th { background: var(--ink); color: var(--gold); font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.6rem 0.8rem; text-align: left; }
+  .ref-table td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--border); line-height: 1.4; vertical-align: top; }
+  .ref-table tr:nth-child(even) td { background: rgba(200,168,75,0.04); }
+  .ref-table .mono { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; color: var(--blue); font-weight: 600; }
+
+  .ref-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+  .ref-card { background: var(--card); border: 1.5px solid var(--border); padding: 1.2rem; }
+  .ref-card-term { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--ink); }
+  .ref-card-def { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+  /* ══════════════════════════════════════
+     ANIMATIONS
+  ══════════════════════════════════════ */
+  @keyframes fadeSlideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  .shake { animation: shake 0.3s ease; }
+
+  .divider { width: 60px; height: 2px; background: var(--gold); margin: 0.8rem auto 2rem; }
+
+  .tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; padding: 0.2rem 0.5rem; text-transform: uppercase; }
+  .tag-labor { background: rgba(42,110,63,0.1); color: var(--green); border: 1px solid rgba(42,110,63,0.2); }
+  .tag-finance { background: rgba(26,58,92,0.1); color: var(--blue); border: 1px solid rgba(26,58,92,0.2); }
+  .tag-bubbles { background: rgba(184,50,50,0.1); color: var(--red); border: 1px solid rgba(184,50,50,0.2); }
+  .tag-investing { background: rgba(200,168,75,0.1); color: #8a6820; border: 1px solid rgba(200,168,75,0.3); }
+  .tag-retirement { background: rgba(80,40,120,0.1); color: #6a3a9a; border: 1px solid rgba(80,40,120,0.25); }
+
+  .streak-badge { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--gold); letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HOME ══════════════════ -->
+<div id="home" class="screen active">
+  <div class="home-badge">EC10b — Macroeconomics</div>
+  <h1 class="home-title">Midterm<br><span>Review</span></h1>
+  <p class="home-sub">Lectures 4, 7 & 8 · Furman & Laibson · Spring 2026</p>
+  <p class="home-topics">Labor Markets · Asset Pricing · Bubbles · Household Finance</p>
+  <div class="divider"></div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startQuiz()">
+      <span class="mode-icon">🧠</span>
+      <div class="mode-name">Quiz Mode</div>
+      <div class="mode-desc">Multiple-choice questions on every formula, concept, and case study from all three lectures. Scored with streak tracking.</div>
+      <div class="mode-count">40 QUESTIONS · SCORED</div>
+    </div>
+    <div class="mode-card" onclick="startFlashcards()">
+      <span class="mode-icon">🃏</span>
+      <div class="mode-name">Flashcards</div>
+      <div class="mode-desc">Flip through key terms, definitions, formulas, and bubble case studies. Click to reveal the back.</div>
+      <div class="mode-count">32 CARDS · SELF-PACED</div>
+    </div>
+    <div class="mode-card" onclick="startFormulas()">
+      <span class="mode-icon">🔢</span>
+      <div class="mode-name">Formula Lab</div>
+      <div class="mode-desc">Plug in numbers for Okun's Law, unemployment rates, present value, and fee compounding. Every formula cold.</div>
+      <div class="mode-count">15 PROBLEMS · INTERACTIVE</div>
+    </div>
+    <div class="mode-card" onclick="startReference()">
+      <span class="mode-icon">📋</span>
+      <div class="mode-name">Reference Sheet</div>
+      <div class="mode-desc">All formulas, unemployment types, bubble comparisons, and investing rules in one clean cheat sheet.</div>
+      <div class="mode-count">COMPLETE REFERENCE</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ QUIZ ══════════════════ -->
+<div id="quiz" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Quiz Mode</div>
+    </div>
+    <div class="score-bar">
+      <div class="score-item"><span class="score-label">SCORE</span><span class="score-val" id="q-score">0</span></div>
+      <div class="score-item"><span class="score-label">STREAK</span><span class="streak-badge" id="q-streak">🔥0</span></div>
+      <div class="score-item"><span class="score-label">Q</span><span class="score-val" id="q-num">1/40</span></div>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="q-progress" style="width:0%"></div></div>
+  <div class="quiz-body">
+    <div class="q-topic" id="q-topic"></div>
+    <div class="q-number" id="q-number"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-formula" id="q-formula" style="display:none"></div>
+    <div class="options-grid" id="q-options"></div>
+    <div class="feedback-box" id="q-feedback"></div>
+    <button class="next-btn" id="q-next" onclick="nextQuestion()">NEXT QUESTION →</button>
+  </div>
+</div>
+
+<!-- ══════════════════ FLASHCARDS ══════════════════ -->
+<div id="flashcards" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Flashcards</div>
+    </div>
+    <div class="score-bar">
+      <div class="score-item"><span class="score-label">CARD</span><span class="score-val" id="fc-count">1/32</span></div>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="fc-progress" style="width:3%"></div></div>
+  <div class="flash-body">
+    <div class="flash-hint">Click card to flip · Use arrow keys to navigate · Space to flip</div>
+    <div class="card-scene" onclick="flipCard()">
+      <div class="card-inner" id="card-inner">
+        <div class="card-face card-front">
+          <div class="card-tag" id="fc-tag">TERM</div>
+          <div class="card-term" id="fc-front"></div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-tag">DEFINITION</div>
+          <div class="card-def" id="fc-back"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flash-controls">
+      <button class="flash-btn" onclick="prevCard()">← PREV</button>
+      <div class="flash-counter" id="fc-counter">1 / 32</div>
+      <button class="flash-btn" onclick="nextCard()">NEXT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ FORMULA LAB ══════════════════ -->
+<div id="formulalab" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Formula Lab</div>
+    </div>
+    <div class="score-bar">
+      <div class="score-item"><span class="score-label">SCORE</span><span class="score-val" id="fl-score">0</span></div>
+      <div class="score-item"><span class="score-label">Q</span><span class="score-val" id="fl-num">1/15</span></div>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="fl-progress" style="width:0%"></div></div>
+  <div class="formula-body" id="fl-body">
+    <div class="formula-display" id="fl-formula"></div>
+    <div class="formula-q" id="fl-question"></div>
+    <div class="fill-options" id="fl-options"></div>
+    <div class="feedback-box" id="fl-feedback"></div>
+    <button class="next-btn" id="fl-next" onclick="nextFormula()">NEXT →</button>
+  </div>
+</div>
+
+<!-- ══════════════════ RESULTS ══════════════════ -->
+<div id="results" class="screen">
+  <div class="result-label">FINAL SCORE</div>
+  <div class="result-grade" id="res-grade">A</div>
+  <div class="result-msg" id="res-msg">Excellent work!</div>
+  <div class="result-sub" id="res-sub">You're ready for the midterm.</div>
+  <div class="result-breakdown">
+    <div class="rb-item"><div class="rb-val" id="res-correct">0</div><div class="rb-label">CORRECT</div></div>
+    <div class="rb-item"><div class="rb-val" id="res-wrong">0</div><div class="rb-label">WRONG</div></div>
+    <div class="rb-item"><div class="rb-val" id="res-pct">0%</div><div class="rb-label">ACCURACY</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="result-btn primary" onclick="startQuiz()">RETRY QUIZ</button>
+    <button class="result-btn secondary" onclick="goHome()">HOME</button>
+    <button class="result-btn secondary" onclick="startReference()">REVIEW SHEET</button>
+  </div>
+</div>
+
+<!-- ══════════════════ REFERENCE ══════════════════ -->
+<div id="reference" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Reference Sheet</div>
+    </div>
+  </div>
+  <div class="ref-body">
+
+    <div class="ref-section">
+      <div class="ref-section-title">Key Formulas</div>
+      <table class="ref-table">
+        <tr><th>Formula</th><th>Name</th><th>Notes</th></tr>
+        <tr><td class="mono">UR = Unemployed ÷ Labor Force</td><td>Unemployment Rate</td><td>e.g. 7.3M ÷ 171M = 4.3%</td></tr>
+        <tr><td class="mono">LFPR = Labor Force ÷ Population</td><td>Labor Force Participation Rate</td><td>e.g. 171M ÷ 274M = 62.7%</td></tr>
+        <tr><td class="mono">ER = Employed ÷ Population</td><td>Employment Rate</td><td>e.g. 164M ÷ 274M = 59.8%</td></tr>
+        <tr><td class="mono">GDP growth ≈ 3% − 2×(ΔUR)</td><td>Okun's Law</td><td>1 p.p. ↓ UR → +2 p.p. GDP. Direct +0.7, Indirect +1.3</td></tr>
+        <tr><td class="mono">M₀ = E₀[Σ(D+B)/(1+i)ᵗ]</td><td>Fundamentals Valuation</td><td>Stock value = PV of all future dividends + buybacks</td></tr>
+        <tr><td class="mono">FV = $1 × (1+r)^n</td><td>Fee Compounding</td><td>Net r = gross return − fee. e.g. 10%−2% = 8% net over 50 yrs</td></tr>
+        <tr><td class="mono">Bond Price = PV(coupons) + PV(face)</td><td>Bond Pricing</td><td>Market rate ↑ → bond price ↓ (inverse relationship)</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Three Types of Unemployment</div>
+      <table class="ref-table">
+        <tr><th>Type</th><th>Definition</th><th>Policy Response</th></tr>
+        <tr><td><strong>Frictional</strong></td><td>Imperfect info; time-consuming job search</td><td>Better job-matching services</td></tr>
+        <tr><td><strong>Structural</strong></td><td>Labor supply > demand persistently due to wage rigidity / institutions</td><td>Labor market reform, education, childcare</td></tr>
+        <tr><td><strong>Cyclical</strong></td><td>Actual UR − Natural Rate; caused by recessions</td><td>Monetary or fiscal stimulus</td></tr>
+        <tr><td><strong>NAIRU</strong></td><td>UR the economy reverts to; cannot be lowered by macro policy without rising inflation</td><td>Microeconomic reforms only</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Bubble Case Studies</div>
+      <table class="ref-table">
+        <tr><th>Event</th><th>Key Lesson</th></tr>
+        <tr><td><strong>South Sea Bubble (1720)</strong></td><td>Isaac Newton lost 1/3 of his wealth. Brilliance ≠ immunity. Groupthink is powerful.</td></tr>
+        <tr><td><strong>Bitcoin / Crypto</strong></td><td>No dividends/buybacks → PV of cash flows = $0 → fundamental value = $0 under standard theory.</td></tr>
+        <tr><td><strong>Meme Stocks (GME, AMC)</strong></td><td>r/WSB-fueled surge disconnected from fundamentals. GME $120 → ~$23. 28% of US adults bought one.</td></tr>
+        <tr><td><strong>$LIBRA Rug Pull (2025)</strong></td><td>Founders held 70% of supply. Price $0.000001 → $5.20 in 40 min → collapsed. Founders +$286M; 74,000 retail investors lost.</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Investing: Passive vs. Active (50-Year Simulation)</div>
+      <table class="ref-table">
+        <tr><th>Metric</th><th>Stock Index</th><th>Single Stock</th></tr>
+        <tr><td>Median outcome ($1 invested)</td><td class="mono">$78</td><td class="mono">$2.71</td></tr>
+        <tr><td>25th percentile</td><td class="mono">$36.40</td><td class="mono">$0.40</td></tr>
+        <tr><td>10th percentile</td><td class="mono">$18</td><td class="mono">—</td></tr>
+        <tr><td>90th percentile</td><td class="mono">$332</td><td class="mono">—</td></tr>
+        <tr><td>99th percentile</td><td class="mono">$1,079</td><td class="mono">$1,988</td></tr>
+        <tr><td>Verdict</td><td>Far safer, strongly recommended</td><td>Catastrophic downside; high upside is rare</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Fee Compounding Math (Gross Return 10%, 50 Years)</div>
+      <table class="ref-table">
+        <tr><th>Annual Fee</th><th>Net Return</th><th>Value of $1 at 75</th></tr>
+        <tr><td>0.1%</td><td class="mono">9.9%</td><td class="mono">~$100</td></tr>
+        <tr><td>0.5%</td><td class="mono">9.5%</td><td class="mono">~$75</td></tr>
+        <tr><td>1.0%</td><td class="mono">9.0%</td><td class="mono">~$57</td></tr>
+        <tr><td>2.0%</td><td class="mono">8.0%</td><td class="mono">~$33</td></tr>
+        <tr><td>3.0%</td><td class="mono">7.0%</td><td class="mono">~$20</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Four Pillars of U.S. Retirement Income</div>
+      <table class="ref-table">
+        <tr><th>Pillar</th><th>Key Details</th></tr>
+        <tr><td><strong>1. Social Security</strong></td><td>Employee + employer each pay 6.2% (cap $184,500 in 2026). Avg benefit ~$2,071/mo. Replacement rate ~90% low earners, ~28% high earners.</td></tr>
+        <tr><td><strong>2. Defined Contribution (401k)</strong></td><td>Employee cap $24,500/yr. Most employers match (e.g. 50¢ per $1 up to 6% of salary). Target Date Funds common.</td></tr>
+        <tr><td><strong>3. Defined Benefit (Pension)</strong></td><td>Employer pays guaranteed annuity after retirement. Rare for this generation outside U.S. public sector.</td></tr>
+        <tr><td><strong>4. IRA</strong></td><td>Used by self-employed, small-company workers, or to roll over a 401k after leaving a job.</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Key Terms Glossary</div>
+      <div class="ref-cards" id="ref-glossary"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+
+const quizQuestions = [
+  // ── LECTURE 4: LABOR MARKET ──
+  {
+    topic: "Lecture 4 · Labor Market Definitions",
+    text: "If there are 164M employed, 7.3M unemployed, and total population is 274M, what is the unemployment rate?",
+    options: ["4.3%", "5.9%", "59.8%", "2.7%"],
+    correct: 0,
+    formula: "UR = Unemployed ÷ (Employed + Unemployed)",
+    feedback: "UR = 7.3M ÷ (164M + 7.3M) = 7.3M ÷ 171.3M ≈ 4.3%. Remember: the denominator is the Labor Force, not total population."
+  },
+  {
+    topic: "Lecture 4 · Labor Market Definitions",
+    text: "Using the same numbers (164M employed, 7.3M unemployed, 274M population), what is the Labor Force Participation Rate?",
+    options: ["62.7%", "59.8%", "4.3%", "67.1%"],
+    correct: 0,
+    formula: "LFPR = Labor Force ÷ Population = (164M + 7.3M) ÷ 274M",
+    feedback: "LFPR = 171.3M ÷ 274M ≈ 62.7%. The Labor Force includes employed + unemployed (but NOT retired, students, or caregivers)."
+  },
+  {
+    topic: "Lecture 4 · Unemployment Types",
+    text: "A factory worker loses their job because a robot now does their task — and there is no new demand for their skill set. This is best described as:",
+    options: ["Frictional unemployment", "Structural unemployment", "Cyclical unemployment", "Seasonal unemployment"],
+    correct: 1,
+    feedback: "Structural unemployment occurs when labor supply > demand persistently due to technology, wage rigidity, or institutional mismatch. The policy: education, labor market reform, retraining — not stimulus."
+  },
+  {
+    topic: "Lecture 4 · Unemployment Types",
+    text: "Which type of unemployment can be reduced by expansionary monetary or fiscal policy?",
+    options: ["Frictional", "Structural", "Cyclical", "NAIRU"],
+    correct: 2,
+    feedback: "Only cyclical unemployment (= Actual UR − Natural Rate) can be reduced by macro policy. Frictional and structural require microeconomic interventions; NAIRU is unaffected by monetary/fiscal tools."
+  },
+  {
+    topic: "Lecture 4 · NAIRU",
+    text: "The NAIRU cannot be lowered by macro policy without triggering:",
+    options: ["Deflation", "Rising inflation", "A budget deficit", "Capital flight"],
+    correct: 1,
+    feedback: "NAIRU = the Natural Rate of Unemployment. Pushing unemployment below it via macro policy causes rising inflation because you're overheating the labor market. Only microeconomic structural reforms (education, childcare, job matching) can shift it."
+  },
+  {
+    topic: "Lecture 4 · Wage Rigidity",
+    text: "Nominal wages are downwardly rigid. What does this imply when labor demand falls sharply?",
+    options: [
+      "Wages fall quickly and the market clears with minimal unemployment",
+      "Firms lay off workers instead of cutting wages, causing larger employment drops",
+      "Real wages rise to compensate",
+      "LFPR increases automatically"
+    ],
+    correct: 1,
+    feedback: "Since firms won't cut nominal wages (contracts, worker morale, HR norms), the adjustment happens through quantity not price: layoffs spike. This amplifies recessions."
+  },
+  {
+    topic: "Lecture 4 · Real vs. Nominal Wages",
+    text: "A worker's nominal wage stays at $50,000/year, but inflation rises 5%. What happens to their real wage?",
+    options: ["It stays the same — only nominal matters", "It rises by 5%", "It falls, because prices rose faster than their wage", "It falls to $47,500"],
+    correct: 2,
+    feedback: "Real wage = purchasing power of the nominal wage. If prices rise 5% but your paycheck doesn't change, you can buy less. Real wages can fall even when nominal wages are unchanged."
+  },
+  {
+    topic: "Lecture 4 · Okun's Law",
+    text: "Okun's Law: GDP growth ≈ 3% − 2×(ΔUR). If unemployment falls by 1.5 percentage points, predicted GDP growth is:",
+    options: ["0%", "3%", "4.5%", "6%"],
+    correct: 3,
+    formula: "GDP growth = 3% − 2 × (−1.5) = 3% + 3%",
+    feedback: "GDP growth = 3% − 2×(−1.5) = 3% + 3% = 6%. A 1 p.p. drop in UR → +2 p.p. GDP. The total is split: direct +0.7 p.p. (more workers) and indirect +1.3 p.p. (hours, LFPR, intensity, capital utilization)."
+  },
+  {
+    topic: "Lecture 4 · Okun's Law",
+    text: "In Okun's Law, which of these is NOT part of the indirect channel (+1.3 p.p.)?",
+    options: ["Longer hours worked", "Higher labor force participation", "Greater work intensity", "More government spending"],
+    correct: 3,
+    feedback: "The indirect Okun channel includes: longer hours, higher LFPR (more workers enter), greater work intensity, and higher capital utilization. Government spending is a fiscal policy tool, not an Okun's Law channel."
+  },
+  {
+    topic: "Lecture 4 · Labor Supply & Demand",
+    text: "Which of the following shifts labor demand to the RIGHT?",
+    options: [
+      "A fall in the price of goods produced by workers",
+      "A rise in input prices like energy",
+      "Technology that raises worker productivity",
+      "Population growth"
+    ],
+    correct: 2,
+    feedback: "Labor demand shifts right when: (1) goods prices rise, (2) technology raises productivity, or (3) input prices fall. Population growth shifts labor SUPPLY right, not demand."
+  },
+  // ── LECTURE 7: ASSET PRICING ──
+  {
+    topic: "Lecture 7 · Fundamentals Valuation",
+    text: "According to the fundamentals formula M₀ = E₀[Σ(D+B)/(1+i)ᵗ], what should you do if market price < fundamental value?",
+    options: ["Sell short", "Hold and wait for it to fall further", "Buy — it's undervalued", "Pay a dividend"],
+    correct: 2,
+    formula: "M₀ = E₀[Σ(D+B)/(1+i)ᵗ]",
+    feedback: "If market price < fundamental value → BUY (it's cheap). If market price > fundamental value → SELL SHORT (borrow share, sell high, buy back cheap, pocket difference minus fees)."
+  },
+  {
+    topic: "Lecture 7 · Fundamentals Valuation",
+    text: "What does 'i' represent in the fundamentals valuation formula M₀ = E₀[Σ(D+B)/(1+i)ᵗ]?",
+    options: ["Inflation rate", "Discount rate / required rate of return", "Interest on dividends", "Income per share"],
+    correct: 1,
+    feedback: "i = the discount rate. A higher discount rate means future cash flows are worth less today, so the stock is worth less now. M₀ = market cap today, D = dividends, B = buybacks, t = time period."
+  },
+  {
+    topic: "Lecture 7 · Efficient Markets",
+    text: "The Efficient Markets Hypothesis says 'smart money' arbitrage pushes prices toward fundamental value. What does this imply about beating the market?",
+    options: [
+      "Expert investors can reliably beat the market using analysis",
+      "No one can ever make money in equities",
+      "There is no reliable way to beat the market by trading",
+      "Active funds consistently outperform index funds"
+    ],
+    correct: 2,
+    feedback: "If smart money quickly exploits any mispricing, there are no persistent easy gains. This is the core argument for passive index investing — active trading systematically underperforms after fees."
+  },
+  {
+    topic: "Lecture 7 · Bond Pricing",
+    text: "If market interest rates rise from 3% to 5%, what happens to the price of an existing bond paying 3% coupons?",
+    options: ["Bond price rises", "Bond price is unaffected", "Bond price falls", "Coupons automatically increase to 5%"],
+    correct: 2,
+    formula: "Bond price = PV(coupons) + PV(face value)",
+    feedback: "Bond price = PV of all future cash flows. A higher discount rate (market rate) reduces all PV terms, so the bond price FALLS. This is the inverse relationship between interest rates and bond prices."
+  },
+  {
+    topic: "Lecture 7 · Bubbles",
+    text: "Instead of asking 'what are the fundamentals?', bubble traders ask:",
+    options: [
+      "'What is the dividend yield?'",
+      "'Will the price be higher tomorrow?'",
+      "'What is the bond equivalent yield?'",
+      "'What does the NAIRU predict?'"
+    ],
+    correct: 1,
+    feedback: "Bubble markets are driven by greater-fool thinking: I'll buy now and sell to someone who'll pay more later. This is disconnected from fundamentals (dividends, buybacks). Keynes called it 'animal spirits.'"
+  },
+  {
+    topic: "Lecture 7 · Bubbles",
+    text: "Why does standard financial theory assign Bitcoin a fundamental value of $0?",
+    options: [
+      "Bitcoin is illegal in most countries",
+      "Bitcoin has no dividends or buybacks, so the PV of all future cash flows = $0",
+      "Bitcoin is too volatile to value",
+      "Only government-backed assets have fundamental value"
+    ],
+    correct: 1,
+    feedback: "Fundamental value = E₀[Σ(D+B)/(1+i)ᵗ]. If D=0 and B=0, every term is zero. So Σ = $0. Bitcoin's entire 'value' rests on the belief others will pay more later — classic greater-fool dynamics."
+  },
+  {
+    topic: "Lecture 7 · Bubbles",
+    text: "Pure bubbles are described as zero-sum games because:",
+    options: [
+      "The government taxes all gains at 50%",
+      "Every dollar a winner gains is a dollar a loser put in — no new wealth is created",
+      "Prices always return to exactly zero",
+      "Both buyers and sellers lose to fees"
+    ],
+    correct: 1,
+    feedback: "Since a pure bubble asset generates zero cash flows, there's no economic value creation. The total gains of all winners exactly equal the total losses of all losers. It's redistribution, not wealth creation."
+  },
+  {
+    topic: "Lecture 7 · Bubble Examples",
+    text: "What lesson does Isaac Newton's experience with the South Sea Bubble (1720) illustrate?",
+    options: [
+      "That fundamental analysis always identifies bubbles in advance",
+      "That government regulation prevents financial manias",
+      "That brilliance and high IQ do not confer immunity to speculative bubbles",
+      "That only poor investors fall for bubbles"
+    ],
+    correct: 2,
+    feedback: "Newton lost approximately 1/3 of his wealth in the South Sea Bubble after initially profiting and then re-entering near the peak. The lesson: groupthink and animal spirits can overwhelm even the most brilliant minds."
+  },
+  {
+    topic: "Lecture 7 · Bubble Examples",
+    text: "In the $LIBRA rug pull (2025), the founders held ___% of the token supply and gained $286M while 74,000 retail investors lost.",
+    options: ["28%", "51%", "70%", "90%"],
+    correct: 2,
+    feedback: "$LIBRA founders held 70% of supply. Price went from $0.000001 to $5.20 in 40 minutes, then collapsed after founders sold. Classic rug pull: insiders dump, retail investors hold worthless tokens."
+  },
+  {
+    topic: "Lecture 7 · Sell Short",
+    text: "To 'sell short' a stock you believe is overvalued, the correct sequence of steps is:",
+    options: [
+      "Buy the stock → wait for price to rise → sell",
+      "Borrow share → sell at current high price → wait → repurchase cheap → return share → pocket difference",
+      "Buy options → exercise → sell at market",
+      "Short a bond → buy back at par → profit from rate difference"
+    ],
+    correct: 1,
+    feedback: "Short selling: (1) Borrow share from a broker, (2) sell at today's high price, (3) wait for the price to fall, (4) repurchase cheaply, (5) return the share, (6) profit = sell price − buy price − fees. Risk: price could rise before you buy back."
+  },
+  {
+    topic: "Lecture 7 · Meme Stocks",
+    text: "GME (GameStop) rose from ~$20 to $120 in Jan 2021, driven by r/WallStreetBets. It then fell to ~$23. This illustrates:",
+    options: [
+      "How fundamental analysis drives price discovery",
+      "How efficient markets quickly reflect intrinsic value upward",
+      "Price disconnection from fundamentals via social media hype, followed by collapse",
+      "How short sellers were correct to hold their positions"
+    ],
+    correct: 2,
+    feedback: "GME's rally was driven by social media coordination, short squeezes, and momentum — not earnings or cash flows. The collapse back to ~$23 was the market reverting toward fundamental value. 28% of US adults bought meme stocks in Jan 2021."
+  },
+  // ── LECTURE 8: HOUSEHOLD FINANCE ──
+  {
+    topic: "Lecture 8 · Risk & Return",
+    text: "What is the expected real (inflation-adjusted) long-run annual return on stocks?",
+    options: ["~1%", "~5%", "~10%", "~15%"],
+    correct: 1,
+    feedback: "Expected real return on stocks ≈ 5% per year (long-run, forward-looking). The risk-free real return is ~1%. The equity risk premium is ~4 percentage points — what you earn for bearing stock market risk."
+  },
+  {
+    topic: "Lecture 8 · Risk Aversion",
+    text: "Someone prefers a certain $125 over a 50/50 bet of $200 or $50 (same expected value). This person is:",
+    options: ["Risk-seeking", "Risk-neutral", "Risk-averse", "Irrationally biased"],
+    correct: 2,
+    feedback: "Risk aversion = preferring a certain outcome over a gamble with the same expected value. This is rational behavior. The EV of the bet is 0.5×$200 + 0.5×$50 = $125 = the certain amount."
+  },
+  {
+    topic: "Lecture 8 · Diversification",
+    text: "Diversification reduces risk without reducing expected return because:",
+    options: [
+      "It guarantees higher returns by spreading across winners",
+      "The government insures diversified portfolios",
+      "Uncorrelated assets offset each other's variance, leaving expected value unchanged",
+      "Active managers select only the best stocks"
+    ],
+    correct: 2,
+    feedback: "Key insight: variance (risk) of a portfolio of uncorrelated assets falls as N increases, but the expected return stays the same. You're not giving up return — you're eliminating idiosyncratic risk for free."
+  },
+  {
+    topic: "Lecture 8 · Index vs. Single Stock",
+    text: "After 50 years, the median outcome of $1 invested in a stock index is ~$78. The median for a single stock is ~$2.71. Why is the single-stock median so much lower?",
+    options: [
+      "Index funds have tax advantages",
+      "Many individual companies go bankrupt or shrink, pulling the median down; winners are asymmetric",
+      "Index funds earn compound interest and stocks do not",
+      "The stock market has underperformed since 1980"
+    ],
+    correct: 1,
+    feedback: "Single stocks have extremely fat-tailed distributions — a few huge winners, many bankruptcies. The median is low because most companies underperform. An index captures all winners and diversifies away losers."
+  },
+  {
+    topic: "Lecture 8 · Passive vs. Active",
+    text: "What is the primary reason most active funds underperform index funds over the long run?",
+    options: [
+      "Active managers are uninformed about economic conditions",
+      "The SEC restricts active fund performance",
+      "High fees compound over time; apparent outperformance is mostly luck (½×½ = 25% chance of 2-year streak)",
+      "Active funds invest in bonds, not stocks"
+    ],
+    correct: 2,
+    feedback: "Active funds charge ~1–2%+ annually vs. ~0.1% for index funds. That fee gap compounds devastatingly. And 1 in 4 active funds will beat the index 2 years in a row purely by chance — so short-term outperformance proves nothing."
+  },
+  {
+    topic: "Lecture 8 · Fee Math",
+    text: "You invest $1 for 50 years. Gross return is 10%. With a 2% annual fee (net 8%), you end up with ~$33. With a 0.1% fee (net 9.9%), you end up with ~$100. The 1.9% fee difference costs you approximately:",
+    options: ["$10", "$20", "$67", "$50"],
+    correct: 2,
+    formula: "(1.099)^50 ≈ $100 vs (1.08)^50 ≈ $33",
+    feedback: "~$100 − ~$33 = ~$67 lost per dollar invested — a 67% reduction in wealth from just 1.9% extra annual fees. This is why Lecture 8 says 'minimize fees' is the single most actionable investing rule."
+  },
+  {
+    topic: "Lecture 8 · Social Security",
+    text: "Social Security's progressive benefit formula means the replacement rate is ~90% for low earners and ~28% for high earners. What does this imply?",
+    options: [
+      "High earners should not participate in Social Security",
+      "Low earners should avoid Social Security to maximize 401k benefits",
+      "High earners must save significantly more from other sources to maintain their pre-retirement standard of living",
+      "Social Security is unfair and should be reformed"
+    ],
+    correct: 2,
+    feedback: "A high earner relying only on Social Security will see their income drop to 28% of what they earned — a massive lifestyle reduction. This is why 401k, IRA, and pension savings are more critical for high earners."
+  },
+  {
+    topic: "Lecture 8 · Retirement Pillars",
+    text: "Which of the following is NOT one of the four pillars of U.S. retirement income?",
+    options: ["Social Security", "Defined Contribution (401k/403b)", "Universal Basic Income (UBI)", "Individual Retirement Account (IRA)"],
+    correct: 2,
+    feedback: "The four pillars: (1) Social Security, (2) Defined Contribution plans (401k/403b/457), (3) Defined Benefit pensions, (4) IRAs. UBI has been proposed but is not an existing retirement income pillar."
+  },
+  {
+    topic: "Lecture 8 · 401k Details",
+    text: "An employee contributes to a 401k. Their employer matches 50 cents per dollar up to 6% of salary. If their salary is $100,000 and they contribute 6%, how much does the employer add?",
+    options: ["$6,000", "$3,000", "$1,500", "$4,500"],
+    correct: 1,
+    formula: "Match = 50% × (6% × $100,000) = 50% × $6,000",
+    feedback: "Employee contributes 6% × $100K = $6,000. Employer matches 50% × $6,000 = $3,000. Total going in: $9,000. Always contribute at least up to the employer match — it's free money."
+  },
+  {
+    topic: "Lecture 8 · Social Security Tax",
+    text: "In 2026, the Social Security payroll tax is 6.2% each from employee and employer, with a wage cap of $184,500. What is the maximum combined annual Social Security tax for one employee?",
+    options: ["$11,439", "$22,878", "$6,200", "$18,450"],
+    correct: 1,
+    formula: "Max SS tax = 12.4% × $184,500",
+    feedback: "12.4% × $184,500 = $22,878 total (split evenly: $11,439 from employee + $11,439 from employer). The cap means earnings above $184,500 are not subject to the Social Security portion."
+  },
+  {
+    topic: "Lecture 8 · All Concepts",
+    text: "Keynes's quote 'animal spirits' and the quote 'the market can remain irrational longer than you can remain solvent' both support which investing strategy?",
+    options: [
+      "Active trading to profit from bubbles",
+      "Short selling overvalued assets as soon as identified",
+      "Avoiding bubbles entirely — don't try to time them",
+      "Investing only in government bonds"
+    ],
+    correct: 2,
+    feedback: "Bubbles can persist far longer than any rational model predicts. Going long or short on a bubble is very high risk — you can be right and still go bankrupt. The lesson: avoid bubbles; don't try to time them."
+  },
+  {
+    topic: "Lecture 4 · Labor Market",
+    text: "If labor demand rises and nominal wages increase as a result, what secondary effect follows?",
+    options: [
+      "Real wages fall automatically",
+      "Business costs rise → prices rise → potential inflation",
+      "LFPR falls as workers retire early",
+      "NAIRU increases permanently"
+    ],
+    correct: 1,
+    feedback: "When labor demand rises: wages rise → business costs rise → firms pass costs to consumers as higher prices → potential inflation. This is why pushing unemployment below NAIRU triggers rising inflation."
+  },
+  {
+    topic: "Lecture 7 · Bubbles",
+    text: "A 'pump and dump' scheme works as follows:",
+    options: [
+      "The company pumps up its earnings, then dumps unprofitable divisions",
+      "Fraudsters hype an asset to inflate the price, then sell their holdings, leaving regular investors with losses",
+      "Central banks inflate asset prices, then sell gold reserves",
+      "Options traders artificially inflate volume to trigger stop-losses"
+    ],
+    correct: 1,
+    feedback: "Classic pump-and-dump: fraudsters buy cheap → create hype → price inflates → they sell at peak → price collapses → retail investors lose. $LIBRA (2025) is a textbook example."
+  },
+  {
+    topic: "Lecture 8 · Diversification Math",
+    text: "In 50-year simulations, the 25th percentile outcome for a single stock is ~$0.40 per $1 invested. For the index it is ~$36.40. This illustrates that:",
+    options: [
+      "Index funds guarantee returns above $36",
+      "The bottom 25% of single-stock investors lose 60 cents on the dollar; index investors in the bottom 25% still 36× their money",
+      "You should buy the 25th percentile stock in any given year",
+      "Index funds are only better in bear markets"
+    ],
+    correct: 1,
+    feedback: "Key insight: even a bad-luck index investor (25th percentile) multiplies their money ~36×. A bad-luck single-stock investor (25th percentile) ends up with only $0.40 — a near-total loss. Diversification protects the downside."
+  },
+  {
+    topic: "Lecture 4 · Okun's Law",
+    text: "According to Okun's Law, if the unemployment rate rises by 2 percentage points, what is the predicted GDP growth rate?",
+    options: ["7%", "3%", "−1%", "1%"],
+    correct: 2,
+    formula: "GDP growth = 3% − 2 × (+2) = 3% − 4% = −1%",
+    feedback: "GDP growth = 3% − 2×(+2) = 3% − 4% = −1%. A rising unemployment rate means the economy is contracting. At +2 p.p. ΔUR, Okun's Law predicts negative GDP growth."
+  },
+  {
+    topic: "Lecture 7 · All Concepts",
+    text: "Why is going SHORT on a clear bubble still considered high risk?",
+    options: [
+      "Short selling is illegal in most markets",
+      "Bubbles always deflate within 90 days by law",
+      "The market can remain irrational longer than you can remain solvent — margin calls can force you to cover at a loss",
+      "Short sellers must pay the full dividend while waiting"
+    ],
+    correct: 2,
+    feedback: "Even if you correctly identify a bubble, it can inflate for months or years. You're paying borrowing fees, and if the price rises against you, margin calls can force you to buy back at a huge loss before the bubble eventually pops. This is why the advice is: just avoid bubbles."
+  },
+  {
+    topic: "Lecture 8 · All Concepts",
+    text: "Which single piece of investing advice is described as actionable for ~99.99% of investors?",
+    options: [
+      "Concentrate in a few high-conviction stocks",
+      "Time the market using Okun's Law",
+      "Hold a low-cost passive index fund and minimize fees",
+      "Allocate 50% to bonds regardless of age"
+    ],
+    correct: 2,
+    feedback: "Lecture 8 explicitly recommends: passive index funds, near-zero fees (~0.1%), for 99.99% of investors. Active funds with high fees will likely underperform after compounding costs. The only reliably predictable thing is the fee."
+  },
+  {
+    topic: "Lecture 4 · Labor Market",
+    text: "Which of these people is NOT counted in the Labor Force (and therefore not in the unemployment rate)?",
+    options: [
+      "Someone who has been laid off and is actively job hunting",
+      "Someone working part-time who wants full-time work",
+      "A retired 65-year-old who stopped looking for work",
+      "Someone who just graduated and started applying to jobs"
+    ],
+    correct: 2,
+    feedback: "The Labor Force = Employed + Unemployed (actively seeking work). People not in the labor force include: retired, full-time students, caregivers, and those who have given up looking. A retiree who stopped working is not unemployed — they're simply not in the labor force."
+  },
+  {
+    topic: "Lecture 8 · All Concepts",
+    text: "Combining all three lectures: which statement best connects labor market health to household investing decisions?",
+    options: [
+      "Low unemployment causes stock bubbles",
+      "High unemployment raises bond prices",
+      "As expected returns on stocks are ~5% real and risk-free is ~1%, bearing stock market risk over a long career (especially via index funds) is generally rational for someone with stable employment income",
+      "The NAIRU determines optimal portfolio allocation"
+    ],
+    correct: 2,
+    feedback: "Key synthesis: human capital (your job) provides stable income (like a bond), so your investment portfolio can afford more equity risk. A 5% real expected return vs. 1% risk-free means ~4 p.p. equity premium — worth taking through a diversified index fund."
+  }
+];
+
+const flashcards = [
+  { tag: "Lecture 4", term: "Unemployment Rate (UR)", def: '<span class="highlight">UR = Unemployed ÷ Labor Force</span><br>e.g. 7.3M ÷ 171M = 4.3%. Denominator is LF, NOT total population.' },
+  { tag: "Lecture 4", term: "Labor Force Participation Rate", def: '<span class="highlight">LFPR = Labor Force ÷ Population</span><br>e.g. 171M ÷ 274M = 62.7%. Labor Force = Employed + Unemployed.' },
+  { tag: "Lecture 4", term: "Employment Rate", def: '<span class="highlight">ER = Employed ÷ Population</span><br>e.g. 164M ÷ 274M = 59.8%. Not in labor force: retired, students, caregivers — NOT counted in UR.' },
+  { tag: "Lecture 4", term: "Frictional Unemployment", def: "Due to imperfect information and time-consuming job search.<br>Policy response: Better job-matching services. Normal part of a healthy economy." },
+  { tag: "Lecture 4", term: "Structural Unemployment", def: "Labor supply > demand persistently due to wage rigidity or institutional mismatch.<br>Policy: education, childcare, labor market reform. Takes longer to fix." },
+  { tag: "Lecture 4", term: "Cyclical Unemployment", def: "Actual UR − Natural Rate. Caused by recessions.<br>Policy: Monetary stimulus (cut rates) or fiscal stimulus (↑G or ↓T). Disappears in expansions." },
+  { tag: "Lecture 4", term: "NAIRU (Natural Rate)", def: "The UR the economy reverts to long-run. Cannot be lowered by macro policy without triggering rising inflation. Only microeconomic reforms (education, job matching) can shift it." },
+  { tag: "Lecture 4", term: "Nominal Wage Rigidity", def: "Firms rarely cut nominal wages (due to contracts, morale). During recessions: instead of wages falling, firms lay off workers. Result: larger employment swings." },
+  { tag: "Lecture 4", term: "Real vs. Nominal Wage", def: "Nominal: your dollar paycheck. Real: purchasing power of that paycheck.<br>Real can fall even if nominal is unchanged — if prices rise faster. Real = Nominal / Price Level." },
+  { tag: "Lecture 4", term: "Okun's Law", def: '<span class="highlight">GDP growth ≈ 3% − 2×(ΔUR)</span><br>1 p.p. ↓ UR → +2 p.p. GDP. Direct: +0.7 p.p. (more workers). Indirect: +1.3 p.p. (hours, LFPR, intensity, capital).' },
+  { tag: "Lecture 4", term: "Labor Demand Shifts (Right)", def: "Labor demand shifts RIGHT when: (1) goods prices rise, (2) technology raises productivity, (3) input prices fall. → wages and employment both rise." },
+  { tag: "Lecture 4", term: "Labor Supply Shifts (Right)", def: "Labor supply shifts RIGHT when: (1) population grows, (2) workers value work more, (3) opportunity cost of working falls. → wages fall, employment rises." },
+  { tag: "Lecture 7", term: "Fundamentals Valuation Formula", def: '<span class="highlight">M₀ = E₀[Σ(D+B)/(1+i)ᵗ]</span><br>Stock value = PV of all future dividends (D) + buybacks (B), discounted at rate i. Basis for value investing (Graham, Buffett).' },
+  { tag: "Lecture 7", term: "Buy vs. Sell Short Rule", def: "Price < fundamental value → BUY (undervalued).<br>Price > fundamental value → SELL SHORT (overvalued).<br>Sell short: borrow → sell high → wait → repurchase cheap → return share → profit." },
+  { tag: "Lecture 7", term: "Efficient Markets Hypothesis", def: "Smart money quickly arbitrages mispricings → price ≈ fundamental value. Implication: no reliable way to beat the market by trading. Supports passive index investing." },
+  { tag: "Lecture 7", term: "Bond Pricing Inverse Relationship", def: "Bond price = PV(coupons) + PV(face value).<br>Market interest rate ↑ → discount rate ↑ → PV of all payments ↓ → bond price FALLS. Always inverse." },
+  { tag: "Lecture 7", term: "Greater Fool Trading", def: "Buying an overpriced asset not for its fundamental value, but to sell to a 'greater fool' who will pay even more later. Drives speculative bubbles. No cash flow required." },
+  { tag: "Lecture 7", term: "Animal Spirits (Keynes)", def: "Keynes's term for irrational waves of optimism/pessimism that move markets independently of fundamentals. 1920s–30s insight — still relevant for understanding bubbles." },
+  { tag: "Lecture 7", term: "Pure Bubbles = Zero Sum", def: "No dividends + no buybacks = $0 cash flows = $0 PV = $0 fundamental value. Every dollar a winner gains = dollar a loser put in. No new wealth created — only redistributed." },
+  { tag: "Lecture 7", term: "South Sea Bubble (1720)", def: "Isaac Newton lost ~1/3 of his wealth. Lesson: brilliance ≠ immunity to bubbles. Groupthink and social contagion can overwhelm rational analysis." },
+  { tag: "Lecture 7", term: "Bitcoin Fundamental Value", def: "Standard theory: No D, No B → Σ(D+B)/(1+i)ᵗ = $0 → Bitcoin's fundamental value = $0. Value rests entirely on belief others will pay more later (greater fool)." },
+  { tag: "Lecture 7", term: "Meme Stocks (GME, AMC)", def: "r/WallStreetBets-fueled surges disconnected from fundamentals. GME: ~$20 → $120 → ~$23. 28% of US adults bought a meme stock in Jan 2021." },
+  { tag: "Lecture 7", term: "$LIBRA Rug Pull (2025)", def: "Founders held 70% of supply. Price: $0.000001 → $5.20 in 40 min → collapsed. Founders: +$286M. 74,000 retail investors lost. Classic pump-and-dump." },
+  { tag: "Lecture 8", term: "Equity Risk & Return", def: "Expected real return on stocks: ~5%/yr. Risk-free real return: ~1%. Equity risk premium: ~4 p.p. — compensation for bearing stock market risk. Over 50 yrs, $1 → median ~$78." },
+  { tag: "Lecture 8", term: "Diversification Principle", def: "Holding many uncorrelated assets REDUCES variance without reducing expected return. Key: reduces risk for free. Index vs single stock (50 yr): $78 median vs $2.71 median." },
+  { tag: "Lecture 8", term: "Passive vs. Active Investing", def: "Passive: buy-and-hold index, ~0.1% fee, recommended for 99.99%.<br>Active: trade to beat market, ~1–2%+ fee, most underperform long-run.<br>Only reliably predictable thing: the fee." },
+  { tag: "Lecture 8", term: "Fee Compounding (50-Year Math)", def: '<span class="highlight">$1 at 10% gross for 50 years:</span><br>0.1% fee → ~$100 | 1% fee → ~$57 | 2% fee → ~$33 | 3% fee → ~$20<br>Minimize fees. Every percentage point costs ~40% of final wealth.' },
+  { tag: "Lecture 8", term: "Four Retirement Pillars", def: "1. Social Security (6.2% each, $184,500 cap, avg $2,071/mo)<br>2. Defined Contribution (401k, $24,500 cap, employer match)<br>3. Defined Benefit Pension (rare)<br>4. IRA (self-employed, job-changers)" },
+  { tag: "Lecture 8", term: "Social Security Replacement Rates", def: "~90% for low earners. ~28% for high earners. Highly progressive formula. Implication: high earners must save more from other sources to maintain standard of living." },
+  { tag: "Lecture 8", term: "Risk Aversion", def: "Preferring a certain outcome over a gamble with equal expected value. E.g.: certain $125 > 50/50 bet of $200 or $50 (EV=$125). Rational — basis for insurance and conservative investing." },
+  { tag: "Lecture 8", term: "Index Fund Distribution (50-yr)", def: "25th pct: $36.40 | Median: $78 | 90th pct: $332 | 99th pct: $1,079<br>vs Single stock: 25th pct $0.40 | Median $2.71 | 99th pct $1,988<br>Index: safer distribution, nearly as much upside." },
+  { tag: "Lecture 8", term: "Equity Risk Premium", def: "~4 percentage points per year. The extra return investors demand for bearing stock market risk over a risk-free asset. Real stock return ~5% − risk-free ~1% = 4% premium." },
+];
+
+const formulaProblems = [
+  {
+    formula: "UR = Unemployed ÷ (Employed + Unemployed)",
+    question: "There are 8M unemployed and 150M employed. What is the unemployment rate?",
+    options: ["5.1%", "4.8%", "5.3%", "3.8%"],
+    correct: 0,
+    feedback: "UR = 8M ÷ (150M + 8M) = 8M ÷ 158M ≈ 5.06% ≈ 5.1%. Remember to divide by the Labor Force (Employed + Unemployed), NOT by total population."
+  },
+  {
+    formula: "LFPR = Labor Force ÷ Population",
+    question: "Labor Force = 158M, total population = 260M. What is the LFPR?",
+    options: ["57.7%", "60.8%", "65.0%", "52.3%"],
+    correct: 1,
+    feedback: "LFPR = 158M ÷ 260M ≈ 60.8%. Not-in-labor-force individuals (retired, students, caregivers) are in the 260M but not the 158M."
+  },
+  {
+    formula: "GDP growth ≈ 3% − 2 × (ΔUR)",
+    question: "Unemployment rises by 2.5 percentage points. What does Okun's Law predict for GDP growth?",
+    options: ["8%", "3%", "0%", "−2%"],
+    correct: 3,
+    feedback: "GDP growth = 3% − 2×(+2.5) = 3% − 5% = −2%. Rising unemployment means a contracting economy. The coefficient of 2 amplifies each 1 p.p. ΔUR into a 2 p.p. GDP swing."
+  },
+  {
+    formula: "GDP growth ≈ 3% − 2 × (ΔUR)",
+    question: "The economy grew at 5% last year. Using Okun's Law, what change in unemployment does this predict?",
+    options: ["UR rose by 1 p.p.", "UR fell by 1 p.p.", "UR fell by 2 p.p.", "UR unchanged"],
+    correct: 1,
+    feedback: "5% = 3% − 2×ΔUR → 2×ΔUR = −2% → ΔUR = −1 p.p. A 5% GDP growth year predicts a 1 percentage point decline in unemployment."
+  },
+  {
+    formula: "M₀ = E₀[Σ(D+B)/(1+i)ᵗ]",
+    question: "A company pays $2/share dividends every year forever, discount rate = 8%. What is fair value (perpetuity formula: D/i)?",
+    options: ["$16", "$25", "$40", "$10"],
+    correct: 1,
+    feedback: "For a perpetuity: Price = D/i = $2 / 0.08 = $25. This is the simplest case of the fundamentals formula — an infinite stream of constant dividends."
+  },
+  {
+    formula: "Bond price = PV(coupons) + PV(face value)",
+    question: "You hold a bond paying 4% coupons. Market interest rates jump to 7%. Your bond price:",
+    options: ["Rises — more coupon income now", "Falls — your coupons are now worth less in PV terms", "Stays the same", "Doubles"],
+    correct: 1,
+    feedback: "Higher market rate → higher discount rate → PV of every future coupon and the face value decreases → bond price falls. A bond paying 4% is less attractive when new bonds pay 7%."
+  },
+  {
+    formula: "FV = $1 × (1 + net_return)^years",
+    question: "Gross return = 10%, annual fee = 2%, years = 50. Approximate value of $1 invested:",
+    options: ["~$100", "~$75", "~$33", "~$20"],
+    correct: 2,
+    feedback: "Net return = 10% − 2% = 8%. FV = (1.08)^50 ≈ 46.9 ≈ ~$33 (lecture slide rounds to ~$33). With 0.1% fee instead: (1.099)^50 ≈ 100. A 1.9% fee difference costs you ~$67."
+  },
+  {
+    formula: "FV = $1 × (1 + net_return)^years",
+    question: "If you invest $1 at a net 9.5% return for 50 years, approximately how much do you have?",
+    options: ["~$57", "~$75", "~$100", "~$33"],
+    correct: 1,
+    feedback: "(1.095)^50 ≈ 74.4 ≈ ~$75. This corresponds to a 0.5% annual fee on a 10% gross return. Compare to ~$100 at 0.1% fee — a 0.4% fee difference costs you $25 over 50 years."
+  },
+  {
+    formula: "Social Security: 6.2% each, cap $184,500 (2026)",
+    question: "An employee earns $200,000/year. How much does the employee alone pay in Social Security tax?",
+    options: ["$12,400", "$11,439", "$6,200", "$8,464"],
+    correct: 1,
+    feedback: "Only wages up to $184,500 are subject to SS tax. Employee SS tax = 6.2% × $184,500 = $11,439. The $15,500 above the cap is not subject to SS payroll tax."
+  },
+  {
+    formula: "401k employer match: 50¢ per $1 up to 6% of salary",
+    question: "Your salary is $80,000 and you contribute 8% to your 401k. How much does your employer contribute (50% match up to 6%)?",
+    options: ["$3,200", "$2,400", "$1,920", "$4,800"],
+    correct: 1,
+    feedback: "Employer matches 50% of up to 6% of salary. Match limit = 50% × (6% × $80K) = 50% × $4,800 = $2,400. Your extra 2% (above 6%) earns no additional match."
+  },
+  {
+    formula: "UR = Unemployed ÷ Labor Force",
+    question: "If 500,000 workers give up looking for work (drop out of labor force), and nothing else changes, what happens to the reported unemployment rate?",
+    options: ["It rises — more people are jobless", "It falls — labor force shrinks, reducing the denominator", "It stays the same", "It depends on nominal wages"],
+    correct: 1,
+    feedback: "This is a famous quirk. If 500K leave the labor force: Unemployed falls by 500K AND Labor Force falls by 500K. Since the ratio (Unemployed/LF) typically falls, the reported UR drops — even though job market conditions got worse."
+  },
+  {
+    formula: "Equity risk premium ≈ 5% real − 1% risk-free = 4%",
+    question: "Over 50 years at a 5% real return, $1 invested grows to roughly $11.47. At 1% real (risk-free), $1 grows to ~$1.64. What is the 'cost' of avoiding stocks (in today's dollars per $1 invested)?",
+    options: ["$0.36", "$9.83", "$1.00", "$4.50"],
+    correct: 1,
+    feedback: "$11.47 − $1.64 = $9.83 per dollar left on the table by avoiding the equity risk premium. This illustrates why bearing stock market risk (via index funds) is rational for long-horizon investors."
+  },
+  {
+    formula: "GDP growth ≈ 3% − 2 × (ΔUR)",
+    question: "In a bad recession, unemployment rises from 4% to 9%. Using Okun's Law, what is predicted GDP growth?",
+    options: ["−7%", "3%", "−7% roughly", "13%"],
+    correct: 0,
+    feedback: "ΔUR = +5 p.p. GDP growth = 3% − 2×(+5) = 3% − 10% = −7%. A severe 5 p.p. unemployment spike predicts a −7% GDP contraction — consistent with the Great Recession range."
+  },
+  {
+    formula: "Diversification: index median $78 vs single stock median $2.71",
+    question: "An investor puts $10,000 in a single stock instead of a stock index. Based on 50-year simulations, the median outcome for the single stock is:",
+    options: ["$780,000", "$27,100", "$780,000", "$100,000"],
+    correct: 1,
+    feedback: "$10,000 × $2.71 = $27,100 for single stock median. vs $10,000 × $78 = $780,000 for index median. The single stock investor earns about 1/29th as much at the median — while taking on much more downside risk."
+  },
+  {
+    formula: "M₀: Price < FV → BUY. Price > FV → SELL SHORT",
+    question: "An analyst estimates a stock's fundamental value at $120/share. The market price is $95. What does fundamentals-based investing suggest?",
+    options: ["Sell short — the price is too high", "Buy — the stock is undervalued", "Hold — wait for the price to rise to $120", "Avoid — the discount implies hidden risk"],
+    correct: 1,
+    feedback: "Market price ($95) < fundamental value ($120) → BUY. The stock is undervalued. If efficient markets hold, smart money will bid the price up toward $120. The risk is that your fundamental value estimate could be wrong."
+  }
+];
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let quizIdx = 0, quizScore = 0, quizStreak = 0, quizAnswered = false;
+let fcIdx = 0, fcFlipped = false;
+let flIdx = 0, flScore = 0, flAnswered = false;
+let shuffledQuiz = [];
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() { showScreen('home'); }
+
+// ══════════════════════════════════════════════
+//  QUIZ
+// ══════════════════════════════════════════════
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function startQuiz() {
+  shuffledQuiz = shuffle(quizQuestions);
+  quizIdx = 0; quizScore = 0; quizStreak = 0;
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = shuffledQuiz[quizIdx];
+  quizAnswered = false;
+
+  document.getElementById('q-topic').textContent = q.topic;
+  document.getElementById('q-number').textContent = `Question ${quizIdx + 1} of ${shuffledQuiz.length}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-score').textContent = quizScore;
+  document.getElementById('q-num').textContent = `${quizIdx + 1}/${shuffledQuiz.length}`;
+  document.getElementById('q-streak').textContent = `🔥${quizStreak}`;
+  document.getElementById('q-progress').style.width = `${(quizIdx / shuffledQuiz.length) * 100}%`;
+
+  const fEl = document.getElementById('q-formula');
+  if (q.formula) { fEl.textContent = q.formula; fEl.style.display = 'inline-block'; }
+  else { fEl.style.display = 'none'; }
+
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-next').style.display = 'none';
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  const shuffledOpts = shuffle(q.options.map((o, i) => ({ text: o, orig: i })));
+
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectAnswer(btn, opt.orig === q.correct, shuffledOpts, q);
+    opts.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn, isCorrect, opts, q) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const buttons = document.querySelectorAll('#q-options .option-btn');
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (opts[i].orig === q.correct) b.classList.add('reveal-correct');
+  });
+
+  const fb = document.getElementById('q-feedback');
+  fb.style.display = 'block';
+
+  if (isCorrect) {
+    btn.classList.remove('reveal-correct');
+    btn.classList.add('correct');
+    quizScore++; quizStreak++;
+    fb.className = 'feedback-box';
+    fb.innerHTML = `<strong>✓ CORRECT</strong>${q.feedback}`;
+  } else {
+    btn.classList.add('wrong');
+    quizStreak = 0;
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = `<strong>✗ INCORRECT</strong>${q.feedback}`;
+    btn.classList.add('shake');
+    setTimeout(() => btn.classList.remove('shake'), 400);
+  }
+
+  document.getElementById('q-score').textContent = quizScore;
+  document.getElementById('q-streak').textContent = `🔥${quizStreak}`;
+  document.getElementById('q-next').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  quizIdx++;
+  if (quizIdx >= shuffledQuiz.length) { showResults(); return; }
+  renderQuestion();
+}
+
+function showResults() {
+  const total = shuffledQuiz.length;
+  const pct = Math.round((quizScore / total) * 100);
+  let grade, msg, sub;
+  if (pct >= 93) { grade = 'A+'; msg = 'Outstanding!'; sub = 'You know this material cold. Go ace that midterm.'; }
+  else if (pct >= 90) { grade = 'A'; msg = 'Excellent work!'; sub = "You're very well prepared."; }
+  else if (pct >= 80) { grade = 'B+'; msg = 'Strong performance.'; sub = "Review the questions you missed and you'll be set."; }
+  else if (pct >= 70) { grade = 'B'; msg = 'Good effort.'; sub = 'Focus on the feedback from wrong answers.'; }
+  else if (pct >= 60) { grade = 'C'; msg = 'Keep studying.'; sub = 'Review the reference sheet and retry.'; }
+  else { grade = 'D'; msg = 'More review needed.'; sub = 'Go through flashcards and reference sheet first.'; }
+
+  document.getElementById('res-grade').textContent = grade;
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-sub').textContent = sub;
+  document.getElementById('res-correct').textContent = quizScore;
+  document.getElementById('res-wrong').textContent = total - quizScore;
+  document.getElementById('res-pct').textContent = pct + '%';
+  showScreen('results');
+}
+
+// ══════════════════════════════════════════════
+//  FLASHCARDS
+// ══════════════════════════════════════════════
+function startFlashcards() {
+  fcIdx = 0; fcFlipped = false;
+  showScreen('flashcards');
+  renderCard();
+}
+
+function renderCard() {
+  const card = flashcards[fcIdx];
+  document.getElementById('fc-front').textContent = card.term;
+  document.getElementById('fc-back').innerHTML = card.def;
+  document.getElementById('fc-tag').textContent = card.tag;
+  document.getElementById('fc-count').textContent = `${fcIdx + 1}/${flashcards.length}`;
+  document.getElementById('fc-counter').textContent = `${fcIdx + 1} / ${flashcards.length}`;
+  document.getElementById('fc-progress').style.width = `${((fcIdx + 1) / flashcards.length) * 100}%`;
+  const ci = document.getElementById('card-inner');
+  fcFlipped ? ci.classList.add('flipped') : ci.classList.remove('flipped');
+}
+
+function flipCard() {
+  fcFlipped = !fcFlipped;
+  document.getElementById('card-inner').classList.toggle('flipped');
+}
+
+function nextCard() { fcIdx = (fcIdx + 1) % flashcards.length; fcFlipped = false; renderCard(); }
+function prevCard() { fcIdx = (fcIdx - 1 + flashcards.length) % flashcards.length; fcFlipped = false; renderCard(); }
+
+// ══════════════════════════════════════════════
+//  FORMULA LAB
+// ══════════════════════════════════════════════
+function startFormulas() {
+  flIdx = 0; flScore = 0; flAnswered = false;
+  showScreen('formulalab');
+  renderFormula();
+}
+
+function renderFormula() {
+  const p = formulaProblems[flIdx];
+  flAnswered = false;
+  document.getElementById('fl-formula').textContent = p.formula;
+  document.getElementById('fl-question').textContent = p.question;
+  document.getElementById('fl-score').textContent = flScore;
+  document.getElementById('fl-num').textContent = `${flIdx + 1}/${formulaProblems.length}`;
+  document.getElementById('fl-progress').style.width = `${(flIdx / formulaProblems.length) * 100}%`;
+  document.getElementById('fl-feedback').style.display = 'none';
+  document.getElementById('fl-next').style.display = 'none';
+
+  const opts = document.getElementById('fl-options');
+  opts.innerHTML = '';
+  p.options.forEach((opt, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'fill-chip';
+    chip.textContent = opt;
+    chip.onclick = () => selectFormula(chip, i === p.correct, p);
+    opts.appendChild(chip);
+  });
+}
+
+function selectFormula(chip, isCorrect, p) {
+  if (flAnswered) return;
+  flAnswered = true;
+  document.querySelectorAll('.fill-chip').forEach(c => c.disabled = true);
+  const fb = document.getElementById('fl-feedback');
+  fb.style.display = 'block';
+  if (isCorrect) {
+    chip.classList.add('correct-chip');
+    flScore++;
+    fb.className = 'feedback-box';
+    fb.innerHTML = `<strong>✓ CORRECT</strong>${p.feedback}`;
+  } else {
+    chip.classList.add('wrong-chip');
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = `<strong>✗ INCORRECT</strong>${p.feedback}`;
+  }
+  document.getElementById('fl-score').textContent = flScore;
+  document.getElementById('fl-next').style.display = 'inline-block';
+}
+
+function nextFormula() {
+  flIdx++;
+  if (flIdx >= formulaProblems.length) {
+    const pct = Math.round((flScore / formulaProblems.length) * 100);
+    document.getElementById('res-grade').textContent = pct >= 80 ? 'A' : pct >= 60 ? 'B' : 'C';
+    document.getElementById('res-msg').textContent = 'Formula Lab Complete!';
+    document.getElementById('res-sub').textContent = `You got ${flScore}/${formulaProblems.length} formula problems correct.`;
+    document.getElementById('res-correct').textContent = flScore;
+    document.getElementById('res-wrong').textContent = formulaProblems.length - flScore;
+    document.getElementById('res-pct').textContent = pct + '%';
+    showScreen('results');
+    return;
+  }
+  renderFormula();
+}
+
+// ══════════════════════════════════════════════
+//  REFERENCE
+// ══════════════════════════════════════════════
+function startReference() {
+  showScreen('reference');
+  const container = document.getElementById('ref-glossary');
+  container.innerHTML = '';
+  flashcards.forEach(card => {
+    const el = document.createElement('div');
+    el.className = 'ref-card';
+    el.innerHTML = `<div class="ref-card-term">${card.term}</div><div class="ref-card-def">${card.def}</div>`;
+    container.appendChild(el);
+  });
+}
+
+// ── Keyboard navigation ──
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('flashcards').classList.contains('active')) return;
+  if (e.key === 'ArrowRight') nextCard();
+  else if (e.key === 'ArrowLeft') prevCard();
+  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+});
+</script>
+</body>
+</html>
